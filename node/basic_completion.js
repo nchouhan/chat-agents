@@ -8,7 +8,7 @@ const client = new OpenAI({
 
 async function main() {
   const completion = await client.chat.completions.create({
-    model: "gpt-4-1106-preview",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",

@@ -15,23 +15,26 @@ client = OpenAI(
 
 # Create a completion
 completion = client.chat.completions.create(
-  model="gpt-4-1106-preview",
-  messages=[
-    {"role": "system", "content": "You are a helpful assistant. Your response should be in JSON format."},
-    {"role": "user", "content": "Give me the colors of the rainbow and their HSL values."}
-  ],
-  response_format={"type": "json_object"}
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant. Your response should be in JSON format."},
+        {"role": "user", "content": "Give me the colors of the rainbow and their HSL values."}
+    ],
+    response_format={"type": "json_object"}
 )
 
 # Print the response
 print(completion.choices[0].message.content)
 
 # Check if the OpenAI API response is a valid JSON
+
+
 def valid_json(response):
-  try:
-    json.loads(response)
-  except ValueError as e:
-    return 'Error: The response is not valid JSON.'
-  return 'Pass: The response is valid JSON.'
+    try:
+        json.loads(response)
+    except ValueError as e:
+        return 'Error: The response is not valid JSON.'
+    return 'Pass: The response is valid JSON.'
+
 
 print(valid_json(completion.choices[0].message.content))

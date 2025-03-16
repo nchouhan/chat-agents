@@ -1,38 +1,37 @@
-/**
- * Python advanced example of how to build an interactive chat with the OpenAI Assistant API.
- */
-
 const openai = require('openai');
 const readline = require('readline');
 const dotenv = require('dotenv');
 dotenv.config();
 
 // Assistant ID (can be a hard-coded ID)
-const ASSISTANT_ID = 'YOUR_ASSISTANT_ID';
-
+const ASSISTANT_ID = 'asst_tob4HEHl3iUr8y5yNZvpvA2h';
 
 // Load the environment variables from the.env file in the root.
 require('dotenv').config({ path: '../.env' });
 
-// Create an OpenAI client
+// Create an OpenAI client with the required header
 const client = new openai({
   apiKey: process.env.OPENAI_API_KEY,
+  headers: {
+    'OpenAI-Beta': 'assistants=v2'
+  }
 });
 
 // Function to submit a message to the assistant
 async function submitMessage(assistantId, thread, userMessage) {
-
   try {
     // Create a message
     await client.beta.threads.messages.create(
       thread.id, // Thread ID as the first argument
-      { role: "user", content: userMessage } // Message data as the second argument
+      { role: "user", content: userMessage }, // Message data as the second argument
+      { headers: { 'OpenAI-Beta': 'assistants=v2' } } // Ensure header is set
     );
 
     // Create a run
     const runResponse = await client.beta.threads.runs.create(
       thread.id, // Thread ID as the first argument
-      { assistant_id: assistantId } // Assistant ID as part of the second argument
+      { assistant_id: assistantId }, // Assistant ID as part of the second argument
+      { headers: { 'OpenAI-Beta': 'assistants=v2' } } // Ensure header is set
     );
 
     return runResponse;
@@ -42,19 +41,20 @@ async function submitMessage(assistantId, thread, userMessage) {
   }
 }
 
-
 // Function to get a response from the assistant
 async function getResponse(thread) {
   try {
     // Correctly call the list method with thread_id as a direct argument
-    const response = await client.beta.threads.messages.list(thread.id);
+    const response = await client.beta.threads.messages.list(
+      thread.id,
+      { headers: { 'OpenAI-Beta': 'assistants=v2' } } // Ensure header is set
+    );
     return response;
   } catch (error) {
     console.error('Error in getResponse:', error);
     throw error;
   }
 }
-
 
 // Function to wait for the assistant's response with a spinner
 async function waitOnRun(run, thread) {
@@ -70,7 +70,8 @@ async function waitOnRun(run, thread) {
     // Check run status
     run = await client.beta.threads.runs.retrieve(
       thread.id,
-      run.id
+      run.id,
+      { headers: { 'OpenAI-Beta': 'assistants=v2' } } // Ensure header is set
     );
     await new Promise(resolve => setTimeout(resolve, 100));
   }
@@ -81,7 +82,6 @@ async function waitOnRun(run, thread) {
   return run;
 }
 
-
 // Pretty printing helper for the last exchange
 function prettyPrint(messages) {
   if (messages.data.length >= 2) {
@@ -90,11 +90,11 @@ function prettyPrint(messages) {
   }
 }
 
-
 // Main chat loop
 async function chatLoop() {
   const assistant = await client.beta.assistants.retrieve(
-    ASSISTANT_ID
+    ASSISTANT_ID,
+    { headers: { 'OpenAI-Beta': 'assistants=v2' } } // Ensure header is set
   );
   console.log(`Welcome to the ${assistant.name} Chat. Type 'exit' to quit.`);
 
@@ -106,7 +106,9 @@ async function chatLoop() {
   });
   rl.prompt();
 
-  const thread = await client.beta.threads.create();
+  const thread = await client.beta.threads.create(
+    { headers: { 'OpenAI-Beta': 'assistants=v2' } } // Ensure header is set
+  );
 
   // Process each line of input from the user
   for await (const line of rl) {
@@ -125,6 +127,5 @@ async function chatLoop() {
     rl.prompt();
   }
 }
-
 
 chatLoop();
